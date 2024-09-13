@@ -39,13 +39,13 @@ function DataGrid(options) {
 
     this.render = element => {
         if (typeof element === 'string') element = document.querySelector(element);
-        else if (!element) element = document.body
+        if (!element) element = document.body
 
-        const tableContainer = DataGridElement('div', 'tableContainer')
-        element.appendChild(tableContainer)
+        const container = DataGridElement('div', 'container')
+        element.appendChild(container)
 
         const table = DataGridElement('table')
-        tableContainer.appendChild(table);
+        container.appendChild(table);
         table.style.width = width;
         table.style.height = height;
 
@@ -82,10 +82,8 @@ function DataGrid(options) {
         if (rows.length === 0) {
             const div = DataGridElement('div', 'noDataDiv')
             const p = DataGridElement('p', 'noDataP')
-
-            p.textContent = texts.noData
             div.appendChild(p)
-
+            p.textContent = texts.noData
             tbody.appendChild(div);
         }
     }
