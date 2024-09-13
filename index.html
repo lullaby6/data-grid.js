@@ -12,7 +12,7 @@
     <div id="wrapper"></div>
 
     <script>
-        DataGrid({
+        new DataGrid({
             columns: [
                 { text: 'Name', key: 'name'},
                 { text: 'Age', key: 'age'},
@@ -26,10 +26,17 @@
                 { name: 'David', age: 40, city: 'Berlin' },
                 { name: 'Eve', age: 45, city: 'Moscow' },
             ],
-            // className: {
+            search: {
+                show: true,
+                value: '',
+                focus: false,
+                placeholder: 'Search...'
+            },
+            className: {
+                // search: 'bg-red-500'
             //     table: 'bg-red-500 min-h-[100px]',
             //     // thead: 'bg-blue-500 flex justify-between'
-            // },
+            },
             texts: {
                 noData:  'No existen datos'
             },
@@ -40,7 +47,7 @@
             //         backgroundColor: 'red'
             //     }
             // }
-        }).render()
+        }).render('#wrapper');
     </script>
 </body>
 </html>
