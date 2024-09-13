@@ -27,8 +27,12 @@ class DataGrid {
         return this
     }
 
-    camelCase(string) {
-        return string.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+    camelCase(str) {
+        return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+    }
+
+    normalizeString(str) {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
     }
 
     elementClassName(element, className) {
@@ -78,13 +82,17 @@ class DataGrid {
             input.addEventListener('input', event => {
                 if (this.search.onInput) this.search.onInput(event)
 
+                const searchValue = this.normalizeString(input.value)
+
                 this.update({
                     rows: this.options.rows.filter(row => {
                         let searched = false
 
-                        this.columns.forEach(column => {
-                            if (row[column.key].toString().toLowerCase().trim().includes(input.value.toLowerCase().trim())) searched = true
-                        })
+                        this.columns.some(column => {
+                            const cellValue = this.normalizeString(row[column.key].toString())
+
+                            if (cellValue.includes(searchValue)) return searched = true;
+                        });
 
                         return searched
                     }),
