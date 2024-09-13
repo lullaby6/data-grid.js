@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./data-grid.css">
+    <script src="./data-grid.js"></script>
+</head>
+<body>
+    <div id="wrapper"></div>
+
+    <script>
+        DataGrid({
+            columns: [
+                { text: 'Name', key: 'name'},
+                { text: 'Age', key: 'age'},
+                { text: 'City', key: 'city' },
+                // { text: 'City', key: 'city', align: 'center', rowAlign: 'center'},
+            ],
+            rows: [
+                { name: 'Alice', age: 25, city: 'New York' },
+                { name: 'Bob', age: 30, city: 'London' },
+                { name: 'Charlie', age: 35, city: 'Paris' },
+                { name: 'David', age: 40, city: 'Berlin' },
+                { name: 'Eve', age: 45, city: 'Moscow' },
+            ],
+            // className: {
+            //     table: 'bg-red-500 min-h-[100px]',
+            //     // thead: 'bg-blue-500 flex justify-between'
+            // },
+            texts: {
+                noData:  'No existen datos'
+            },
+            // width: 'fit-content'
+            // style: {
+            //     // table: 'background-color: red'
+            //     table: {
+            //         backgroundColor: 'red'
+            //     }
+            // }
+        }).render()
+    </script>
+</body>
+</html>
