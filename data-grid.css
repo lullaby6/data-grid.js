@@ -1,6 +1,8 @@
 .data-grid-container {
     display: flex;
     flex-direction: column;
+    overflow: auto;
+    position: relative;
 }
 
 .data-grid-header {
@@ -9,7 +11,17 @@
     align-items: center;
 }
 
+.data-grid-double-scrollbar-container {
+    overflow: auto;
+    height: 20px;
+    width: 100%;
+    position: sticky;
+    left: 0;
+}
+
 .data-grid-table {
+    width: 100%;
+    height: auto;
     table-layout: fixed;
 }
 
@@ -36,9 +48,21 @@
     gap: 10px;
 }
 
+.data-grid-limits-preffix {
+    text-wrap: nowrap;
+}
+
+.data-grid-limits-suffix {
+    text-wrap: nowrap;
+}
+
 .data-grid-search-div {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 10px;
+}
+
+.data-grid-search-preffix {
+    text-wrap: nowrap;
 }

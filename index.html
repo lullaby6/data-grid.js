@@ -9,10 +9,13 @@
     <script src="./data-grid.js"></script>
 </head>
 <body>
-    <div id="wrapper"></div>
+    <div class="w-[200px]">
+        <div id="wrapper"></div>
+    </div>
 
     <script>
         new DataGrid({
+            // width: 250,
             columns: [
                 {
                     name: 'name',
@@ -50,6 +53,7 @@
                 limit: 25,
                 limits: [1, 2, 3, 10, 25, 50, 100]
             },
+            doubleScrollbar: true,
             className: {
                 // search: 'bg-red-500'
             //     table: 'bg-red-500 min-h-[100px]',

@@ -19,8 +19,8 @@ class DataGrid {
         this.columnsByName = this.columns.reduce((acc, column) => ({ ...acc, [column.name]: column }), {});
         this.rows = options.rows || [];
 
-        this.width = options.width || '100%';
-        this.height = options.height || 'auto';
+        // this.width = options.width || '100%';
+        // this.height = options.height || 'auto';
 
         this.defaultTexts = {
             noData: 'No data',
@@ -49,6 +49,10 @@ class DataGrid {
     setMaxArrayLength(array, length) {
         if (array.length > length) array.length = length
         return array
+    }
+
+    hasHorizontalScrollbar($element) {
+        return $element.scrollWidth > $element.clientWidth;
     }
 
     cloneObjectsArray(array) {
@@ -216,10 +220,19 @@ class DataGrid {
             })
         }
 
+        if (this.options.doubleScrollbar) {
+            const $doubleScrollbarContainer = this.element('div', 'double-scrollbar-container')
+            $container.prepend($doubleScrollbarContainer)
+
+            const $doubleScrollbarDiv = this.element('div', 'double-scrollbar-div')
+            $doubleScrollbarContainer.appendChild($doubleScrollbarDiv)
+        }
+
         const $table = this.element('table')
         $container.appendChild($table);
-        $table.style.width = this.width;
-        $table.style.height = this.height;
+
+        $table.style.width = typeof this.width === 'number' ? `${this.width}px` : this.width;
+        $table.style.height = typeof this.height === 'number' ? `${this.height}px` : this.height;
 
         const $thead = this.element('thead')
         $table.appendChild($thead);
@@ -259,6 +272,28 @@ class DataGrid {
             });
             $tbody.appendChild($tr);
         });
+
+        if (this.options.doubleScrollbar) {
+            const $doubleScrollbarContainer = this.elements['double-scrollbar-container']
+
+            const $doubleScrollbarDiv = this.elements['double-scrollbar-div']
+
+            $doubleScrollbarContainer.style.width = `${$container.clientWidth}px`
+            $doubleScrollbarDiv.style.width = `${$container.scrollWidth}px`
+
+            window.addEventListener('resize', () => {
+                $doubleScrollbarContainer.style.width = `${$container.clientWidth}px`
+                $doubleScrollbarDiv.style.width = `${$container.scrollWidth}px`
+            })
+
+            $container.addEventListener('scroll', () => {
+                $doubleScrollbarContainer.scrollLeft = $container.scrollLeft
+            })
+
+            $doubleScrollbarContainer.addEventListener('scroll', () => {
+                $container.scrollLeft = $doubleScrollbarContainer.scrollLeft
+            })
+        }
 
         if (this.rows.length === 0 && this.texts.noData && typeof this.texts.noData === 'string' && this.texts.noData.trim() !== '') {
             const $div = this.element('div', 'noDataDiv')
