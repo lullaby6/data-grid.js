@@ -100,7 +100,7 @@ class DataGrid {
         return $element
     }
 
-    doSearch(value) {
+    handlSearch(value) {
         value = this.normalizeString(value)
 
         return this.options.rows.filter(row => {
@@ -255,7 +255,7 @@ class DataGrid {
 
         let displayRows = this.cloneObjectsArray(this.rows)
 
-        if (this.search.value) displayRows = this.doSearch(this.search.value)
+        if (this.search.value) displayRows = this.handlSearch(this.search.value)
 
         if (this.pagination.limit) this.setMaxArrayLength(displayRows, this.pagination.limit)
 
@@ -281,9 +281,15 @@ class DataGrid {
             $doubleScrollbarContainer.style.width = `${$container.clientWidth}px`
             $doubleScrollbarDiv.style.width = `${$container.scrollWidth}px`
 
+            if (this.hasHorizontalScrollbar($container)) $doubleScrollbarContainer.style.display = 'block';
+            else $doubleScrollbarContainer.style.display = 'none';
+
             window.addEventListener('resize', () => {
                 $doubleScrollbarContainer.style.width = `${$container.clientWidth}px`
                 $doubleScrollbarDiv.style.width = `${$container.scrollWidth}px`
+
+                if (this.hasHorizontalScrollbar($container)) $doubleScrollbarContainer.style.display = 'block';
+                else $doubleScrollbarContainer.style.display = 'none';
             })
 
             $container.addEventListener('scroll', () => {
