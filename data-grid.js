@@ -12,6 +12,7 @@ class DataGrid {
 
         this.style = options.style || {}
         this.className = options.className || {}
+        this.attributes = options.attributes || {}
 
         this.columns = options.columns || [];
         this.columnNames = this.columns.map(column => column.name);
@@ -76,12 +77,21 @@ class DataGrid {
         }
     }
 
+    elementAttributes($element, attributes) {
+        if (typeof attributes === 'object') {
+            for (const key in attributes) {
+                $element.setAttribute(key, attributes[key]);
+            }
+        }
+    }
+
     element(tag, name = null) {
         if (name === null) name = tag
         const $element = document.createElement(tag);
         this.elements[name] = $element
         if (this.className && this.className[name]) this.elementClassName($element, this.className[name]);
         if (this.style && this.style[name]) this.elementStyle($element, this.style[name]);
+        if (this.attributes && this.attributes[name]) this.elementAttributes($element, this.attributes[name]);
         $element.classList.add(`data-grid-${this.camelCase(name)}`);
         return $element
     }
