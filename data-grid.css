@@ -3,6 +3,12 @@
     flex-direction: column;
 }
 
+.data-grid-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .data-grid-table {
     table-layout: fixed;
 }
@@ -21,4 +27,18 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.data-grid-limits-div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.data-grid-search-div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
 }

@@ -8,6 +8,8 @@ class DataGrid {
     config(options) {
         options = { ...this.options, ...options }
 
+        this.elements = {}
+
         this.style = options.style || {}
         this.className = options.className || {}
 
@@ -21,12 +23,34 @@ class DataGrid {
 
         this.defaultTexts = {
             noData: 'No data',
+            limitsPrefix: 'Show',
+            limitsSuffix: 'rows per page',
+            searchPrefix: 'Search:',
         }
         this.texts = { ...this.defaultTexts, ...options.texts }
 
         this.search = options.search || {}
 
+        this.pagination = options.pagination || {}
+
+        this.sort = options.pagination || {}
+
         return this
+    }
+
+    setArrayLength(array, length) {
+        while (array.length < length) array.push(undefined)
+        if (array.length > length) array.length = length
+        return array
+    }
+
+    setMaxArrayLength(array, length) {
+        if (array.length > length) array.length = length
+        return array
+    }
+
+    cloneObjectsArray(array) {
+        return array.map(object => ({ ...object }))
     }
 
     camelCase(str) {
@@ -54,10 +78,35 @@ class DataGrid {
     element(tag, name = null) {
         if (name === null) name = tag
         const $element = document.createElement(tag);
+        this.elements[name] = $element
         if (this.className && this.className[name]) this.elementClassName($element, this.className[name]);
         if (this.style && this.style[name]) this.elementStyle($element, this.style[name]);
         $element.classList.add(`data-grid-${this.camelCase(name)}`);
         return $element
+    }
+
+    doSearch(value) {
+        value = this.normalizeString(value)
+
+        return this.options.rows.filter(row => {
+            let searched = false
+
+            let searchColumns = this.columnNames
+
+            if (this.search.columns) searchColumns = this.search.columns
+
+            searchColumns.some(columnName => {
+                const column = this.columnsByName[columnName]
+
+                if (column.search === false) return
+
+                const cellValue = this.normalizeString(row[column.name].toString())
+
+                if (cellValue.includes(value)) return searched = true;
+            });
+
+            return searched
+        })
     }
 
     render($element) {
@@ -73,9 +122,65 @@ class DataGrid {
         const $header = this.element('div', 'header')
         $container.appendChild($header)
 
+        if (this.pagination.limits) {
+            const $div = this.element('div', 'limitsDiv')
+            $header.appendChild($div)
+
+            if (this.texts.limitsPrefix && typeof this.texts.limitsPrefix === 'string' && this.texts.limitsPrefix.trim() !== '') {
+                const $prefix = this.element('p', 'limitsPrefix')
+                $div.appendChild($prefix)
+                $prefix.textContent = this.texts.limitsPrefix
+            }
+
+            const $limits = this.element('select', 'limits')
+            $div.appendChild($limits)
+
+            if (this.texts.limitsSuffix && typeof this.texts.limitsSuffix === 'string' && this.texts.limitsSuffix.trim() !== '') {
+                const $suffix = this.element('p', 'limitsSuffix')
+                $div.appendChild($suffix)
+                $suffix.textContent = this.texts.limitsSuffix
+            }
+
+            if (this.pagination.limit === undefined) this.pagination.limit = this.pagination.limits[0]
+            else if (!this.pagination.limits.includes(parseInt(this.pagination.limit))) this.pagination.limit = this.pagination.limits[0]
+
+            this.pagination.limits.forEach(limit => {
+                const $option = this.element('option')
+                $option.value = limit
+                $option.textContent = limit
+
+                if (limit == this.pagination.limit) $option.selected = true
+
+                $limits.appendChild($option)
+            })
+
+            $limits.addEventListener('change', event => {
+                this.update({
+                    search: {
+                        ...this.search,
+                        value: this.elements.search.value,
+                        focus: false
+                    },
+                    pagination: {
+                        ...this.pagination,
+                        limit: $limits.value
+                    }
+                })
+            })
+        }
+
         if (this.search.show) {
+            const $div = this.element('div', 'searchDiv')
+            $header.appendChild($div)
+
+            if (this.texts.searchPrefix && typeof this.texts.searchPrefix === 'string' && this.texts.searchPrefix.trim() !== '') {
+                const $prefix = this.element('p', 'searchPrefix')
+                $div.appendChild($prefix)
+                $prefix.textContent = this.texts.searchPrefix
+            }
+
             const $input = this.element('input', 'search')
-            $header.appendChild($input)
+            $div.appendChild($input)
 
             if (this.search.value) $input.value = this.search.value
             if (this.search.placeholder) $input.placeholder = this.search.placeholder
@@ -84,28 +189,8 @@ class DataGrid {
             $input.addEventListener('input', event => {
                 if (this.search.onInput) this.search.onInput(event)
 
-                const searchValue = this.normalizeString($input.value)
-
                 this.update({
-                    rows: this.options.rows.filter(row => {
-                        let searched = false
-
-                        let searchColumns = this.columnNames
-
-                        if (this.search.columns) searchColumns = this.search.columns
-
-                        searchColumns.some(columnName => {
-                            const column = this.columnsByName[columnName]
-
-                            if (column.search === false) return
-
-                            const cellValue = this.normalizeString(row[column.name].toString())
-
-                            if (cellValue.includes(searchValue)) return searched = true;
-                        });
-
-                        return searched
-                    }),
+                    rows: this.doSearch($input.value),
                     search: {
                         ...this.search,
                         value: $input.value,
@@ -139,7 +224,13 @@ class DataGrid {
         const $tbody = this.element('tbody')
         $table.appendChild($tbody);
 
-        this.rows.forEach(row => {
+        let displayRows = this.cloneObjectsArray(this.rows)
+
+        if (this.search.value) displayRows = this.doSearch(this.search.value)
+
+        if (this.pagination.limit) this.setMaxArrayLength(displayRows, this.pagination.limit)
+
+        displayRows.forEach(row => {
             const $tr = this.element('tr')
             this.columns.forEach(column => {
                 if (column.hidden) return
@@ -147,14 +238,13 @@ class DataGrid {
                 const $td = this.element('td')
                 $td.style.textAlign = column.rowAlign || 'left';
                 if (column.width) $td.style.width = column.width;
-                $td.setAttribute('data-grid-column-name', column.name);
                 $td.textContent = row[column.name];
                 $tr.appendChild($td);
             });
             $tbody.appendChild($tr);
         });
 
-        if (this.rows.length === 0) {
+        if (this.rows.length === 0 && this.texts.noData && typeof this.texts.noData === 'string' && this.texts.noData.trim() !== '') {
             const $div = this.element('div', 'noDataDiv')
             const $p = this.element('p', 'noDataP')
             $div.appendChild($p)

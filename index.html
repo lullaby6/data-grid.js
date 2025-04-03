@@ -26,15 +26,18 @@
                 {
                     name: 'city',
                     label: 'City',
-                    hidden: true,
+                    // hidden: true,
                 },
                 // { text: 'City', key: 'city', align: 'center', rowAlign: 'center'},
             ],
             rows: [
                 { name: 'Alice', age: 25, city: 'New York' },
+                { name: 'Alice', age: 25, city: 'New York' },
                 { name: 'Bob', age: 30, city: 'London' },
                 { name: 'Charlie', age: 35, city: 'Paris' },
                 { name: 'David', age: 40, city: 'Berlin' },
+                { name: 'Eve', age: 45, city: 'Moscow' },
+                { name: 'Eve', age: 45, city: 'Moscow' },
                 { name: 'Eve', age: 45, city: 'Moscow' },
             ],
             search: {
@@ -44,13 +47,17 @@
                 placeholder: 'Search...',
                 // columns: ['name']
             },
+            pagination: {
+                limit: 25,
+                limits: [1, 2, 3, 10, 25, 50, 100]
+            },
             className: {
                 // search: 'bg-red-500'
             //     table: 'bg-red-500 min-h-[100px]',
             //     // thead: 'bg-blue-500 flex justify-between'
             },
             texts: {
-                noData:  'No existen datos'
+                noData:  'No existen datos',
             },
             // width: 'fit-content'
             // style: {
