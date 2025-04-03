@@ -222,7 +222,7 @@ class DataGrid {
 
         if (this.options.doubleScrollbar) {
             const $doubleScrollbarContainer = this.element('div', 'double-scrollbar-container')
-            $container.prepend($doubleScrollbarContainer)
+            $container.appendChild($doubleScrollbarContainer)
 
             const $doubleScrollbarDiv = this.element('div', 'double-scrollbar-div')
             $doubleScrollbarContainer.appendChild($doubleScrollbarDiv)
