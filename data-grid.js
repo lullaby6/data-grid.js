@@ -165,7 +165,7 @@ class DataGrid {
                 $limits.appendChild($option)
             })
 
-            $limits.addEventListener('change', event => {
+            $limits.addEventListener('change', () => {
                 this.update({
                     search: {
                         ...this.search,
@@ -174,7 +174,7 @@ class DataGrid {
                     },
                     pagination: {
                         ...this.pagination,
-                        limit: $limits.value
+                        limit: this.elements.limits.value
                     }
                 })
             })
@@ -203,11 +203,14 @@ class DataGrid {
                 if (this.search.onInput) this.search.onInput(event)
 
                 this.update({
-                    rows: this.doSearch($input.value),
                     search: {
                         ...this.search,
-                        value: $input.value,
+                        value: this.elements.search.value,
                         focus: true
+                    },
+                    pagination: {
+                        ...this.pagination,
+                        limit: this.elements.limits.value
                     }
                 })
             })
