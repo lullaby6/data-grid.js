@@ -25,6 +25,7 @@ class DataGrid {
             noData: 'No data',
             limitsPrefix: 'Show',
             limitsSuffix: 'rows per page',
+            searchPlaceholder: 'Search...',
             searchPrefix: 'Search:',
         }
         this.texts = { ...this.defaultTexts, ...options.texts }
@@ -183,8 +184,10 @@ class DataGrid {
             $div.appendChild($input)
 
             if (this.search.value) $input.value = this.search.value
-            if (this.search.placeholder) $input.placeholder = this.search.placeholder
+            if (this.texts.searchPlaceholder && typeof this.texts.searchPlaceholder === 'string' && this.texts.searchPlaceholder.trim() !== '') $input.placeholder = this.texts.searchPlaceholder
             if (this.search.focus) $input.focus()
+            if (this.search.spellcheck !== true) $input.spellcheck = false
+            if (this.search.autocomplete !== true) $input.autocomplete = false
 
             $input.addEventListener('input', event => {
                 if (this.search.onInput) this.search.onInput(event)
