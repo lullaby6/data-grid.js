@@ -12,6 +12,8 @@ class DataGrid {
         this.className = options.className || {}
 
         this.columns = options.columns || [];
+        this.columnNames = this.columns.map(column => column.name);
+        this.columnsByName = this.columns.reduce((acc, column) => ({ ...acc, [column.name]: column }), {});
         this.rows = options.rows || [];
 
         this.width = options.width || '100%';
@@ -35,61 +37,69 @@ class DataGrid {
         return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
     }
 
-    elementClassName(element, className) {
-        if (typeof className == 'string') element.className = className;
-        else if (typeof className == 'object') element.classList.add(...className);
+    elementClassName($element, className) {
+        if (typeof className == 'string') $element.className = className;
+        else if (typeof className == 'object') $element.classList.add(...className);
     }
 
-    elementStyle(element, style) {
-        if (typeof style === 'string') element.style.cssText = style;
+    elementStyle($element, style) {
+        if (typeof style === 'string') $element.style.cssText = style;
         else if (typeof style === 'object') {
             for (const key in style) {
-                element.style[key] = style[key];
+                $element.style[key] = style[key];
             }
         }
     }
 
     element(tag, name = null) {
         if (name === null) name = tag
-        const element = document.createElement(tag);
-        if (this.className && this.className[name]) this.elementClassName(element, this.className[name]);
-        if (this.style && this.style[name]) this.elementStyle(element, this.style[name]);
-        element.classList.add(`data-grid-${this.camelCase(name)}`);
-        return element
+        const $element = document.createElement(tag);
+        if (this.className && this.className[name]) this.elementClassName($element, this.className[name]);
+        if (this.style && this.style[name]) this.elementStyle($element, this.style[name]);
+        $element.classList.add(`data-grid-${this.camelCase(name)}`);
+        return $element
     }
 
-    render(element) {
-        this.parent = element
+    render($element) {
+        this.parent = $element
 
-        if (typeof element === 'string') element = document.querySelector(element);
-        if (!element) element = document.body
-        if (element != document.body) element.innerHTML = '';
+        if (typeof $element === 'string') $element = document.querySelector($element);
+        if (!$element) $element = document.body
+        if ($element != document.body) $element.innerHTML = '';
 
-        const container = this.element('div', 'container')
-        element.appendChild(container)
+        const $container = this.element('div', 'container')
+        $element.appendChild($container)
 
-        const header = this.element('div', 'header')
-        container.appendChild(header)
+        const $header = this.element('div', 'header')
+        $container.appendChild($header)
 
         if (this.search.show) {
-            const input = this.element('input', 'search')
-            header.appendChild(input)
+            const $input = this.element('input', 'search')
+            $header.appendChild($input)
 
-            if (this.search.value) input.value = this.search.value
-            if (this.search.placeholder) input.placeholder = this.search.placeholder
-            if (this.search.focus) input.focus()
+            if (this.search.value) $input.value = this.search.value
+            if (this.search.placeholder) $input.placeholder = this.search.placeholder
+            if (this.search.focus) $input.focus()
 
-            input.addEventListener('input', event => {
+            $input.addEventListener('input', event => {
                 if (this.search.onInput) this.search.onInput(event)
 
-                const searchValue = this.normalizeString(input.value)
+                const searchValue = this.normalizeString($input.value)
 
                 this.update({
                     rows: this.options.rows.filter(row => {
                         let searched = false
 
-                        this.columns.some(column => {
-                            const cellValue = this.normalizeString(row[column.key].toString())
+                        let searchColumns = this.columnNames
+
+                        if (this.search.columns) searchColumns = this.search.columns
+
+                        searchColumns.some(columnName => {
+                            const column = this.columnsByName[columnName]
+
+                            if (column.search === false) return
+
+                            const cellValue = this.normalizeString(row[column.name].toString())
 
                             if (cellValue.includes(searchValue)) return searched = true;
                         });
@@ -98,58 +108,62 @@ class DataGrid {
                     }),
                     search: {
                         ...this.search,
-                        value: input.value,
+                        value: $input.value,
                         focus: true
                     }
                 })
             })
         }
 
-        const table = this.element('table')
-        container.appendChild(table);
-        table.style.width = this.width;
-        table.style.height = this.height;
+        const $table = this.element('table')
+        $container.appendChild($table);
+        $table.style.width = this.width;
+        $table.style.height = this.height;
 
-        const thead = this.element('thead')
-        table.appendChild(thead);
+        const $thead = this.element('thead')
+        $table.appendChild($thead);
 
-        const tr = this.element('tr')
+        const $tr = this.element('tr')
         this.columns.forEach(column => {
-            const th = this.element('th')
-            th.style.textAlign = column.align || 'left';
-            if (column.width) th.style.width = column.width;
-            th.setAttribute('data-grid-column-key', column.key);
-            th.textContent = column.text;
-            tr.appendChild(th);
-        });
-        thead.appendChild(tr);
+            if (column.hidden) return
 
-        const tbody = this.element('tbody')
-        table.appendChild(tbody);
+            const $th = this.element('th')
+            $th.style.textAlign = column.align || 'left';
+            if (column.width) $th.style.width = column.width;
+            $th.setAttribute('data-grid-column-name', column.name);
+            $th.textContent = column.label;
+            $tr.appendChild($th);
+        });
+        $thead.appendChild($tr);
+
+        const $tbody = this.element('tbody')
+        $table.appendChild($tbody);
 
         this.rows.forEach(row => {
-            const tr = this.element('tr')
+            const $tr = this.element('tr')
             this.columns.forEach(column => {
-                const td = this.element('td')
-                td.style.textAlign = column.rowAlign || 'left';
-                if (column.width) td.style.width = column.width;
-                td.setAttribute('data-grid-column-key', column.key);
-                td.textContent = row[column.key];
-                tr.appendChild(td);
+                if (column.hidden) return
+
+                const $td = this.element('td')
+                $td.style.textAlign = column.rowAlign || 'left';
+                if (column.width) $td.style.width = column.width;
+                $td.setAttribute('data-grid-column-name', column.name);
+                $td.textContent = row[column.name];
+                $tr.appendChild($td);
             });
-            tbody.appendChild(tr);
+            $tbody.appendChild($tr);
         });
 
         if (this.rows.length === 0) {
-            const div = this.element('div', 'noDataDiv')
-            const p = this.element('p', 'noDataP')
-            div.appendChild(p)
-            p.textContent = this.texts.noData
-            tbody.appendChild(div);
+            const $div = this.element('div', 'noDataDiv')
+            const $p = this.element('p', 'noDataP')
+            $div.appendChild($p)
+            $p.textContent = this.texts.noData
+            $tbody.appendChild($div);
         }
 
-        const footer = this.element('div', 'footer')
-        container.appendChild(footer)
+        const $footer = this.element('div', 'footer')
+        $container.appendChild($footer)
 
         return this
     }

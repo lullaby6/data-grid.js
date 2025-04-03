@@ -14,9 +14,20 @@
     <script>
         new DataGrid({
             columns: [
-                { text: 'Name', key: 'name'},
-                { text: 'Age', key: 'age'},
-                { text: 'City', key: 'city' },
+                {
+                    name: 'name',
+                    label: 'Name',
+                },
+                {
+                    name: 'age',
+                    label: 'Age',
+                    search: false
+                },
+                {
+                    name: 'city',
+                    label: 'City',
+                    hidden: true,
+                },
                 // { text: 'City', key: 'city', align: 'center', rowAlign: 'center'},
             ],
             rows: [
@@ -30,7 +41,8 @@
                 show: true,
                 value: '',
                 focus: false,
-                placeholder: 'Search...'
+                placeholder: 'Search...',
+                // columns: ['name']
             },
             className: {
                 // search: 'bg-red-500'
